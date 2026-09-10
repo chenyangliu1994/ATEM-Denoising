@@ -1,0 +1,5 @@
+﻿scenario_id,public_filename,scenario,total_rows,train_rows,val_rows,test_rows
+E1,E1_shielded_16stack.dat,"Shielded room, 16-stack",14171,11336,1417,1418
+E2,E2_shielded_single.dat,"Shielded room, single acquisition",2883,2306,288,289
+E3,E3_urban_roadside_16stack.dat,"Urban roadside, 16-stack",62539,50031,6253,6255
+E4,E4_urban_roadside_single.dat,"Urban roadside, single acquisition",44847,35877,4484,4486

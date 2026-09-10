@@ -1,0 +1,43 @@
+seed: 2024
+
+clean_response_file: data/clean_responses/clean_responses_ablation_320000x40.dat
+
+split:
+  train_ratio: 0.80
+  val_ratio: 0.10
+
+synthesis:
+  scale_divisor: 20.0
+  reference_channel_1based: 22
+
+wasserstein:
+  latent_dim: 100
+  hidden_dim: 128
+  output_dim: 40
+  learning_rate: 0.0002
+  batch_size: 64
+  epochs: 100
+  beta1: 0.5
+  beta2: 0.9
+  lambda_gp: 10.0
+  alpha_distribution: normal
+  discriminator_generator_update_ratio: "1:1"
+  reuse_discriminator_latent_for_generator: true
+
+denoiser:
+  input_dim: 40
+  hidden_dim: 128
+  gate_hidden_dim: 64
+  max_gate_delta: 0.10
+  batch_size: 32
+  scale: 1.0e19
+  stage1_epochs: 100
+  stage1_lr: 0.001
+  stage2_epochs: 40
+  stage2_lr: 0.00001
+  lambda_nrmse: 2.0
+  gate_regularization: 0.001
+  stage2_grad_clip: 0.05
+  eps_relative_scaled: 1.0
+  eps_nrmse: 1.0e-12
+  min_improvement: 1.0e-7

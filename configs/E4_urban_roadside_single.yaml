@@ -1,0 +1,5 @@
+id: E4
+slug: E4_urban_roadside_single
+name: "Urban roadside, single acquisition"
+measured_noise_file: data/measured_noise/E4_urban_roadside_single.dat
+expected_total_rows: 44847

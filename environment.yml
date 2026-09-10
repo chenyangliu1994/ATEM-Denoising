@@ -1,0 +1,13 @@
+name: atem-denoising
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - matplotlib
+  - scipy
+  - pyyaml
+  - pytorch

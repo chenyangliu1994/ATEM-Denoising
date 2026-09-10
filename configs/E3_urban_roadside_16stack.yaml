@@ -1,0 +1,5 @@
+id: E3
+slug: E3_urban_roadside_16stack
+name: "Urban roadside, 16-stack"
+measured_noise_file: data/measured_noise/E3_urban_roadside_16stack.dat
+expected_total_rows: 62539

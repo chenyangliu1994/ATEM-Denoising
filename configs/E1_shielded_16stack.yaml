@@ -1,0 +1,5 @@
+id: E1
+slug: E1_shielded_16stack
+name: "Shielded room, 16-stack"
+measured_noise_file: data/measured_noise/E1_shielded_16stack.dat
+expected_total_rows: 14171

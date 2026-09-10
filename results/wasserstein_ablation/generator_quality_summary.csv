@@ -1,0 +1,5 @@
+﻿Scenario,real_global_std,generated_global_std,global_std_ratio_gen_over_real,median_channel_std_ratio,correlation_matrix_MAE,flattened_wasserstein_distance
+E1,0.285455,0.298998,1.047,0.9127,0.1928,0.12579
+E2,1.99375,3.13027,1.57,1.5247,0.2533,1.0047
+E3,1.36955,1.18472,0.865,0.7454,0.17938,0.375
+E4,6.29021,6.50654,1.034,1.0206,0.14213,0.8795
