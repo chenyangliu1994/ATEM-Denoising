@@ -2,7 +2,7 @@
 
 Reproducible code and data organization for airborne transient electromagnetic (ATEM) denoising using physics-based clean responses, independently measured noise, and Wasserstein generative augmentation with a gradient-norm penalty.
 
-This repository contains the **denoising and Wasserstein-augmentation ablation component** of the study. The full physics-based generation workflow for the 640,000-response clean library will be released separately; the clean-response subset required for the present controlled denoising ablation is included here.
+This repository contains the **denoising and Wasserstein-augmentation ablation component** of the study. The model-generation and forward-simulation workflow is available in [ATEM-Forward-Model-Library](https://github.com/chenyangliu1994/ATEM-Forward-Model-Library). The clean-response subset required for the controlled denoising ablation is included here.
 
 ## What is included
 
@@ -36,6 +36,7 @@ ATEM-Denoising/
 │  ├─ clean_responses/
 │  └─ measured_noise/
 ├─ experiments/
+│  ├─ synthetic_combined_noise/
 │  └─ wasserstein_ablation/
 ├─ figures/
 │  ├─ draw_augmentation_workflow.py
@@ -94,6 +95,18 @@ x_i=s_i+\frac{n_i}{20}s_{22}, \qquad y_i=s_i
 $$
 
 where `s_i` is the clean ATEM response at channel `i`, `n_i` is the corresponding measured/generated noise value, and `s_22` denotes the 22nd clean-response channel used as the common amplitude reference.
+
+## Three representative method-comparison conditions
+
+The following three conditions have been selected for the planned comparison with other denoising methods. Their data-construction code is organized in this repository:
+
+| Condition | Data construction | Location |
+|---|---|---|
+| Synthetic combined noise (`d=10`) | Generate 40-channel clean forward responses and add atmospheric-pulse, Gaussian, and harmonic noise; save 40 noisy values + 40 clean values per row. | [`experiments/synthetic_combined_noise/`](experiments/synthetic_combined_noise/README.md) |
+| E2 — shielded room, single acquisition | Split independently measured noise chronologically and construct paired training, validation, and test data. | `experiments/wasserstein_ablation/01_split_measured_noise.py` and `04_build_ablation_dataset.py` (use `--scenario E2`) |
+| E4 — urban roadside, single acquisition | Use the same measured-noise splitting and paired-data construction workflow for the roadside single-acquisition records. | `experiments/wasserstein_ablation/01_split_measured_noise.py` and `04_build_ablation_dataset.py` (use `--scenario E4`) |
+
+The synthetic combined-noise script preserves the historical generation procedure; the generated synthetic dataset is **not included** in this repository. The E2/E4 data-construction scripts also support the separate four-scenario Wasserstein A/B ablation described below. These three data-construction entry points are available, but a **unified train/validation/test protocol and cross-method benchmark results for all three conditions have not yet been added**. Do not interpret the existing A/B ablation results as a comparison with external denoising methods.
 
 ## Four measured-noise scenarios
 
