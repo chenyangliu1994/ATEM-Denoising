@@ -1,0 +1,45 @@
+{
+  "experiment": "E2_measured_noise_TEM1Dformer_paper_guided_independent_prediction",
+  "date_finished_local": "2026-10-01 10:37:03",
+  "python": "3.11.16",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "torch": "2.5.1+cu121",
+  "cuda_runtime": "12.1",
+  "numpy": "2.4.6",
+  "pandas": "3.0.5",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+  "official_code_available": false,
+  "implementation_type": "paper-guided reimplementation",
+  "test_csv": "E4_城市道路旁_1次叠加\\test_real_only.dat",
+  "n_test": 4486,
+  "test_batch_size": 256,
+  "model_path": "E4_城市道路旁_1次叠加\\FORMAL_E4_BASELINES\\TEM1Dformer_E4_FORMAL_stable_best.pth",
+  "model_size_MB": 0.3212928771972656,
+  "parameters": 77441,
+  "paper_reported_parameters": 77921,
+  "best_epoch": 12,
+  "validation": {
+    "mse_scaled": 0.00035924918935655747,
+    "rmse_scaled": 0.018953870036395138,
+    "nrmse": 0.022363260408648753,
+    "snr_db": 33.00929758077488,
+    "mae_scaled": 0.0014504655771934486
+  },
+  "scale": 552067103.6269418,
+  "final_test_seconds": 0.25932680000551045,
+  "training_performed": false,
+  "test_time_adaptation": false,
+  "sample_level_harmful_summary": {
+    "TEM1Dformer_sample_harmful_rate": 0.5581810075791351,
+    "TEM1Dformer_sample_improved_rate": 0.4418189924208649,
+    "TEM1Dformer_sample_tied_rate": 0.0,
+    "Mean_raw_minus_TEM1Dformer_sample_RMSE": 6.050074578865849e-13,
+    "Median_raw_minus_TEM1Dformer_sample_RMSE": -9.007349486915137e-15
+  },
+  "gain_summary": {
+    "TEM1Dformer_RMSE_reduction_vs_Raw_pct": 20.21506997968985,
+    "TEM1Dformer_SNR_gain_vs_Raw_dB": 1.9615826309009066,
+    "TEM1Dformer_MRE_change_vs_Raw_pct": 1.2593796780043354
+  }
+}

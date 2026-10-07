@@ -1,158 +1,155 @@
 # ATEM-Denoising
 
-Reproducible code and data organization for airborne transient electromagnetic (ATEM) denoising using physics-based clean responses, independently measured noise, and Wasserstein generative augmentation with a gradient-norm penalty.
+Code and experiment records for 40-channel airborne transient electromagnetic
+(ATEM) response denoising. The current model uses a fully connected
+encoder-decoder (FC-ED) followed by a selective residual correction gate
+(SRCG).
 
-This repository contains the **denoising and Wasserstein-augmentation ablation component** of the study. The model-generation and forward-simulation workflow is available in [ATEM-Forward-Model-Library](https://github.com/chenyangliu1994/ATEM-Forward-Model-Library). The clean-response subset required for the controlled denoising ablation is included here.
+## Method
 
-## What is included
+FC-ED first produces a candidate response \(z\). SRCG then estimates a
+channel-wise factor \(\alpha\) that controls how much of the FC-ED correction
+is used:
 
-- Fixed 40-channel fully connected encoder-decoder denoiser.
-- Bounded channel gating (BCG).
-- Two-stage relative-to-hybrid (R-H) training protocol.
-- Chronological measured-noise split: 80% train / 10% validation / 10% test.
-- Wasserstein noise generator using the archived gradient-norm penalty implementation.
-- Matched-size A/B augmentation ablation:
-  - **A:** measured-noise resampling control.
-  - **B:** Wasserstein generative augmentation.
-- Common held-out measured-noise test evaluation.
-- Scripts for reproducing the main ablation figures, including the full-test paired A/B RMSE scatter figure.
+\[
+\hat y=x+\alpha\odot(z-x), \qquad 0\leq\alpha\leq1.
+\]
 
-## Important implementation note
+The auxiliary target used during Stage 2 is
 
-The archived generative implementation uses `alpha = torch.randn(...)` inside the gradient-norm penalty rather than the canonical `alpha ~ U(0,1)` interpolation used in standard WGAN-GP.
+\[
+\alpha^*=\mathrm{clip}\left(
+\frac{(s-x)(z-x)}
+{(z-x)^2+\epsilon},
+0,1
+\right).
+\]
 
-Therefore, this repository refers to the method as:
+It is used with a small weight (0.05) to regularize the gate. In practical
+terms, FC-ED proposes the correction and SRCG controls its amplitude at each
+time channel.
 
-**Wasserstein generative augmentation with gradient-norm penalty**
+### Training settings
 
-rather than claiming exact equivalence to canonical WGAN-GP.
+- input channels: 40
+- FC-ED hidden dimension: 512
+- SRCG hidden dimension: 64
+- batch size: 32
+- scale: `1e19`
+- random seed: 2024
+- Stage 1: 220 epochs, Adam, `lr=1e-3`, Relative Error loss
+- Stage 1 checkpoint: minimum validation `Relative + 2*NRMSE`
+- Stage 2: 100 epochs, FC-ED frozen, Adam, `lr=1e-5`
+- Stage 2 objective: `Hybrid + 0.05*SmoothL1(alpha, alpha_star)`
 
-## Repository structure
+The test set is not used for training or model selection.
 
-```text
-ATEM-Denoising/
-├─ configs/
-├─ data/
-│  ├─ clean_responses/
-│  └─ measured_noise/
-├─ experiments/
-│  ├─ synthetic_combined_noise/
-│  └─ wasserstein_ablation/
-├─ figures/
-│  ├─ draw_augmentation_workflow.py
-│  ├─ plot_channel_rmse.py
-│  ├─ plot_overall_benefit.py
-│  └─ plot_full_test_ab_rmse_scatter.py
-├─ outputs/
-├─ results/
-│  └─ wasserstein_ablation/
-├─ src/
-│  ├─ augmentation/
-│  ├─ data/
-│  ├─ evaluation/
-│  ├─ losses/
-│  ├─ models/
-│  └─ training/
-├─ environment.yml
-├─ requirements.txt
-└─ README.md
-```
+## Measured-noise datasets
 
-## Data convention
-
-The controlled ablation uses the following data layouts.
-
-### Clean responses
-
-`N × 40`
-
-Each row is one 40-channel physics-based clean ATEM response.
-
-The public clean-response file used by the present ablation contains **320,000 × 40** values and is stored under:
-
-```text
-data/clean_responses/
-```
-
-### Measured-noise files
-
-`N × 80`
-
-- columns 1–40: time channels
-- columns 41–80: measured noise
-
-### Supervised denoising files
-
-`N × 80`
-
-- columns 1–40: noisy response
-- columns 41–80: clean response
-
-All four measured-noise scenarios use the same synthesis rule:
-
-$$
-x_i=s_i+\frac{n_i}{20}s_{22}, \qquad y_i=s_i
-$$
-
-where `s_i` is the clean ATEM response at channel `i`, `n_i` is the corresponding measured/generated noise value, and `s_22` denotes the 22nd clean-response channel used as the common amplitude reference.
-
-## Three representative method-comparison conditions
-
-The following three conditions have been selected for the planned comparison with other denoising methods. Their data-construction code is organized in this repository:
-
-| Condition | Data construction | Location |
-|---|---|---|
-| Synthetic combined noise (`d=10`) | Generate 40-channel clean forward responses and add atmospheric-pulse, Gaussian, and harmonic noise; save 40 noisy values + 40 clean values per row. | [`experiments/synthetic_combined_noise/`](experiments/synthetic_combined_noise/README.md) |
-| E2 — shielded room, single acquisition | Split independently measured noise chronologically and construct paired training, validation, and test data. | `experiments/wasserstein_ablation/01_split_measured_noise.py` and `04_build_ablation_dataset.py` (use `--scenario E2`) |
-| E4 — urban roadside, single acquisition | Use the same measured-noise splitting and paired-data construction workflow for the roadside single-acquisition records. | `experiments/wasserstein_ablation/01_split_measured_noise.py` and `04_build_ablation_dataset.py` (use `--scenario E4`) |
-
-The synthetic combined-noise script preserves the historical generation procedure; the generated synthetic dataset is **not included** in this repository. The E2/E4 data-construction scripts also support the separate four-scenario Wasserstein A/B ablation described below. These three data-construction entry points are available, but a **unified train/validation/test protocol and cross-method benchmark results for all three conditions have not yet been added**. Do not interpret the existing A/B ablation results as a comparison with external denoising methods.
-
-## Four measured-noise scenarios
-
-| ID | Scenario | Total measured-noise rows | Train | Validation | Test |
+| ID | Acquisition condition | Total | Train | Validation | Test |
 |---|---|---:|---:|---:|---:|
 | E1 | Shielded room, 16-stack | 14,171 | 11,336 | 1,417 | 1,418 |
 | E2 | Shielded room, single acquisition | 2,883 | 2,306 | 288 | 289 |
 | E3 | Urban roadside, 16-stack | 62,539 | 50,031 | 6,253 | 6,255 |
 | E4 | Urban roadside, single acquisition | 44,847 | 35,877 | 4,484 | 4,486 |
 
-The urban-roadside measurements were collected in the actual local electromagnetic environment. An operating wireless router was present nearby. This is reported only as an environmental condition and is **not** treated as a proven causal noise source.
+Supervised denoising files contain 80 columns: the first 40 columns are noisy
+responses and the last 40 columns are the corresponding clean responses.
 
-## Matched augmentation ablation
+The synthesis rule is
 
-For a scenario with `N` measured training-noise vectors:
+\[
+x_i=s_i+\frac{n_i}{20}s_{22}, \qquad y=s.
+\]
 
-### Group A — measured-noise resampling control
+## Wasserstein augmentation ablation
 
-- first `N`: original measured training noise
-- second `N`: bootstrap resampling with replacement from the same measured training pool
+For each scenario, the WGAN and No-WGAN groups have the same number of
+training samples and use the same clean-response sequence.
 
-### Group B — Wasserstein augmentation
+- **No-WGAN same-N**: measured training noise + bootstrap resampling from the
+  same measured-noise pool.
+- **WGAN Full**: the same measured training noise + generated noise.
 
-- first `N`: the same original measured training noise
-- second `N`: `N` newly generated noise vectors
+Validation and test data contain held-out measured noise only.
 
-A and B therefore contain exactly the same number of training samples and use the same clean-response sequence.
+The result varies with acquisition condition. Direct measured-noise resampling
+is better in E1 and E2, while Wasserstein augmentation is better in E3 and E4.
+Because the amount of measured training noise also differs substantially among
+the four cases, this difference cannot be assigned to environmental complexity
+alone.
 
-Validation and test sets contain **only held-out measured noise** and are never used to train either the Wasserstein generator or the denoising model.
+Summary files:
 
-## Quick start
-
-Create the environment:
-
-```bash
-conda env create -f environment.yml
-conda activate atem-denoising
+```text
+results/wasserstein_ablation/current_overall_ablation_summary.csv
+results/paperfinal_raw/
 ```
 
-or install from:
+## Comparison with other denoising methods
 
-```bash
-pip install -r requirements.txt
+The cross-method comparison uses the two single-acquisition cases, E2 and E4.
+The following methods are included:
+
+- Raw input
+- Wavelet: SWT-sym6, level 3, MAD + universal soft threshold
+- TEMDnet
+- TEM1Dformer
+- FC-ED (H512)
+- FC-ED + SRCG
+
+The TEM1Dformer code in this repository is a paper-guided reimplementation;
+official source code was not available.
+
+For the trainable methods, E2 and E4 use the same WGAN-augmented training set,
+validation set, and held-out measured-noise test set. Wavelet is applied
+directly to the same test responses.
+
+Results are provided in:
+
+```text
+results/method_comparison/E2/
+results/method_comparison/E4/
+results/method_comparison/method_comparison_summary.csv
+results/method_comparison/method_comparison_harmful_rates.csv
 ```
 
-Place the public data according to `data/README.md`, then run one scenario, for example E1:
+In addition to RMSE/NRMSE/SNR, the repository reports the sample-level harmful
+modification rate, i.e. the fraction of test samples for which processing
+increases RMSE relative to the raw input.
+
+## Synthetic combined-noise experiments
+
+The repository also retains the earlier synthetic combined-noise scripts.
+Those experiments were useful during method development, but the main analysis
+here uses measured-noise cases.
+
+## Repository structure
+
+```text
+configs/
+data/
+experiments/
+  paperfinal_reference/
+  synthetic_combined_noise/
+  wasserstein_ablation/
+figures/
+results/
+  method_comparison/
+  paperfinal_raw/
+  wasserstein_ablation/
+src/
+  augmentation/
+  data/
+  evaluation/
+  losses/
+  models/
+  training/
+```
+
+## Running the augmentation ablation
+
+For E1:
 
 ```bash
 python experiments/wasserstein_ablation/01_split_measured_noise.py --scenario E1
@@ -164,55 +161,27 @@ python experiments/wasserstein_ablation/05_train_denoiser.py --scenario E1 --gro
 python experiments/wasserstein_ablation/06_evaluate_common_test.py --scenario E1
 ```
 
-Repeat for E2–E4.
+Use `--scenario E2`, `E3`, or `E4` for the other cases.
 
-The final common-test evaluation scripts do **not** update model parameters.
+## Note on the Wasserstein generator
 
-## Reproducing the main ablation figures
+The archived generator uses a normally distributed interpolation coefficient
+inside the gradient-norm penalty. Standard WGAN-GP uses a uniform interpolation
+coefficient. For this reason, the repository refers to this part as
+**Wasserstein generative augmentation with a gradient-norm penalty** rather
+than canonical WGAN-GP.
 
-The figure scripts are stored in:
+## Data and checkpoints
 
-```text
-figures/
-```
+Large training/validation/test `.dat` files, model checkpoints, and intermediate
+arrays are not included in the GitHub repository. The compact CSV/JSON results
+and plotting data are kept with the code.
 
-The full-test paired A/B RMSE scatter figure is generated with:
+See `data/README.md` and `UPLOAD_CHECKLIST.md`.
 
-```bash
-python figures/plot_full_test_ab_rmse_scatter.py
-```
-
-For each held-out test sample:
-
-- x-axis: per-sample RMSE of Group A
-- y-axis: per-sample RMSE of Group B
-- points below the equality line `y = x`: lower RMSE for Wasserstein augmentation
-- points above the equality line: lower RMSE for measured-noise resampling
-
-This figure uses **all held-out test samples** and does not rely on selected representative examples.
-
-## Reproduced test results
-
-The manuscript-level A/B test metrics are provided in:
-
-```text
-results/wasserstein_ablation/test_metrics_all_scenarios.csv
-results/wasserstein_ablation/comparison_summary.csv
-```
-
-Additional generator-quality summaries are provided in:
-
-```text
-results/wasserstein_ablation/generator_quality_summary.csv
-```
-
-## Code and data availability
-
-Repository:
+## Repository
 
 https://github.com/chenyangliu1994/ATEM-Denoising
-
-The repository contains the denoising code, Wasserstein-augmentation ablation workflow, measured-noise data, the clean-response subset used by the controlled ablation, configuration files, figure scripts, and summary results.
 
 ## License
 

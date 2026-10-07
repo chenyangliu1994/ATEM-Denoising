@@ -1,27 +1,32 @@
 # Wasserstein augmentation ablation
 
-This directory reproduces the matched A/B experiment used in the manuscript.
+This directory contains the common workflow used for E1-E4.
 
-## Protocol
+For each acquisition condition:
 
-For each scenario:
+1. Split measured noise chronologically into 80% train, 10% validation, and
+   10% test.
+2. Train the Wasserstein noise generator on the training split only.
+3. Build two equal-size denoising training sets:
+   - A / No-WGAN: measured noise + bootstrap-resampled measured noise.
+   - B / WGAN: the same measured noise + generated noise.
+4. Use the same clean-response rows in A and B.
+5. Train the same H512 FC-ED + SRCG model for both groups.
+6. Train Stage 1 for 220 epochs and Stage 2 for 100 epochs.
+7. Evaluate both models on the same held-out measured-noise test set.
 
-1. Keep the original measured-noise acquisition order.
-2. Split continuously into 80% train, 10% validation, 10% test.
-3. Train the Wasserstein generator using **training measured noise only**.
-4. Build equal-size A/B training sets:
-   - A = measured + bootstrap-resampled measured
-   - B = the same measured + generated
-5. Use identical clean-response rows for A and B.
-6. Use the same synthesis rule in all scenarios:
-   `x_i = s_i + (n_i / 20) * s_22`
-7. Train A and B with the same two-stage R-H protocol.
-8. Evaluate both once on the same held-out measured-noise test set.
+The Stage 2 alpha-target term has weight 0.05.
 
-## Run
+## Results
+
+E1/E2 favor direct measured-noise resampling, whereas E3/E4 favor Wasserstein
+augmentation. The amount of measured training noise is also different across
+the four conditions, so these results should not be explained by environment
+type alone.
+
+## Example
 
 ```bash
-python 00_validate_public_data.py
 python 01_split_measured_noise.py --scenario E1
 python 02_train_wasserstein_generator.py --scenario E1
 python 03_check_generated_noise.py --scenario E1

@@ -1,5 +1,0 @@
-﻿Scenario,RMSE_improvement_pct,MAE_improvement_pct,MeanRelative_improvement_pct,Early2_RMSE_improvement_pct,Middle2_29_RMSE_improvement_pct,Late10_RMSE_improvement_pct,SNR_gain_dB
-E1,63.148,51.723,2.757,63.468,62.306,-261.551,8.671
-E2,48.792,30.895,-5.173,22.107,63.807,-40.164,5.813
-E3,39.697,31.032,54.151,-23.465,67.915,58.49,4.393
-E4,28.017,-14.139,-8.482,20.013,32.732,54.401,2.855

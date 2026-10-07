@@ -26,18 +26,17 @@ wasserstein:
 
 denoiser:
   input_dim: 40
-  hidden_dim: 128
-  gate_hidden_dim: 64
-  max_gate_delta: 0.10
+  hidden_dim: 512
+  srcg_hidden_dim: 64
   batch_size: 32
   scale: 1.0e19
-  stage1_epochs: 100
+  stage1_epochs: 220
   stage1_lr: 0.001
-  stage2_epochs: 40
+  stage2_epochs: 100
   stage2_lr: 0.00001
   lambda_nrmse: 2.0
-  gate_regularization: 0.001
-  stage2_grad_clip: 0.05
+  continuous_teacher_weight: 0.05
   eps_relative_scaled: 1.0
   eps_nrmse: 1.0e-12
+  eps_alpha: 1.0e-12
   min_improvement: 1.0e-7

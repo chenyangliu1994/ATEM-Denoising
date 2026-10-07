@@ -1,0 +1,2 @@
+FCED_sample_harmful_rate,SRCG_sample_harmful_rate,FCED_sample_improved_rate,SRCG_sample_improved_rate,SRCG_better_than_FCED_sample_rate,Mean_FCED_minus_SRCG_sample_RMSE,Median_FCED_minus_SRCG_sample_RMSE
+0.7889273356401384,0.09688581314878893,0.21107266435986158,0.903114186851211,0.9342560553633218,1.4159473314733684e-12,1.3537209411849198e-13

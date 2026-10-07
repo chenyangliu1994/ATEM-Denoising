@@ -1,0 +1,2 @@
+Model,Parameters,PaperReportedParameters,BestEpoch,BestValNRMSE,BestValSNR_dB,TrainingSeconds,TrainingHours
+TEM1Dformer_E2_paper_guided,77441,77921,48,0.003666545336635501,48.714858812146105,282.74100459999954,0.07853916794444432

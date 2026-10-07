@@ -11,6 +11,3 @@ outputs/*
 # Temporary files
 *.tmp
 *.log
-CODE_AVAILABILITY_TEXT.md
-UPLOAD_CHECKLIST.md
-validate_ATEM_public_data_jiangzaochuli.bat

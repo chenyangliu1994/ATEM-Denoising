@@ -1,0 +1,2 @@
+Method,TestSamples,TotalInference_s,PerSample_ms,TrainableParameters
+Wavelet_SWT_Sym6_L3_soft,289,0.043161999999938416,0.14934948096864506,0

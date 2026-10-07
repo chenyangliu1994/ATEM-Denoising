@@ -1,0 +1,15 @@
+{
+  "method": "stationary_wavelet_soft_threshold",
+  "wavelet": "sym6",
+  "level": 3,
+  "threshold_mode": "soft",
+  "threshold_scale": 1.0,
+  "sigma_estimator": "MAD of finest SWT detail",
+  "threshold_formula": "sigma*sqrt(2*ln(N))",
+  "test_file": "E2_屏蔽室_1次叠加\\test_real_only.dat",
+  "test_samples": 289,
+  "training_required": false,
+  "clean_used_by_denoiser": false,
+  "clean_used_for_evaluation_only": true,
+  "output_directory": "E2_屏蔽室_1次叠加\\FORMAL_E2_BASELINES"
+}
